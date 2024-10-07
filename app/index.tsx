@@ -12,13 +12,13 @@ export default function LoginScreen() {
     checkToken();
   }, []);
 
-  const API_URL = 'http://192.168.56.1:8000'; // Replace with your computer's ipv4 address
+  const API_URL = 'http://10.0.0.100:8000'; // Replace with your computer's ipv4 address
 
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token');
     if (token) {
       try {
-        const response = await fetch('${API_URL}/auth/check-token/', {
+        const response = await fetch(`${API_URL}/auth/check-token/`, {
           method: 'GET',
           headers: {
             'Authorization': `Token ${token}`,
@@ -39,7 +39,7 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch('${API_URL}/auth/login/', {
+      const response = await fetch(`${API_URL}/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default function LoginScreen() {
     const token = await AsyncStorage.getItem('token');
     if (token) {
       try {
-        const response = await fetch('${API_URL}/auth/logout/', {
+        const response = await fetch(`${API_URL}/auth/logout/`, {
           method: 'POST',
           headers: {
             'Authorization': `Token ${token}`,
