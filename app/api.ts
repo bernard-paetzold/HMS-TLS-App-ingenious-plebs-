@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.1.32:8000'; // Replace with your computer's ipv4 address
+const API_URL = 'http://10.0.0.107:8000'; // Replace with your computer's ipv4 address
 
 export const checkToken = async () => {
   const token = await AsyncStorage.getItem('token');

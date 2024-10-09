@@ -1,8 +1,14 @@
-// app/LoginScreen.tsx
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Stack, useNavigation } from 'expo-router';
-import { useEffect } from 'react';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type RootStackParamList = {
+    HomeScreen: undefined;
+    LoginScreen: undefined;
+};
+  
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LoginScreen'>;
 
 const LoginScreen = () => {
     const [username, setUsername] = useState('');
@@ -16,8 +22,6 @@ const LoginScreen = () => {
 
     const handleLogin = () => {
         
-        // Add your login logic here
-        // For demonstration, consider the login successful
         if (username && password) {
             Alert.alert('Login', `Username: ${username}\nPassword: ${password}`);
             navigation.navigate('HomeScreen'); 
