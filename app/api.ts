@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://10.0.0.107:8000'; // Replace with your computer's ipv4 address
+let API_URL = ""; // Replace with your computer's ipv4 address
 
 export const checkToken = async () => {
   const token = await AsyncStorage.getItem('token');
@@ -21,8 +21,11 @@ export const checkToken = async () => {
   return false;
 };
 
-export const login = async (username: string, password: string) => {
+export const login = async (username: string, password: string, ip: string = "") => {
   try {
+    if (API_URL == "" && ip != ""){
+      API_URL = `http://${ip}:8000`
+    }
     const response = await fetch(`${API_URL}/auth/login/`, {
       method: 'POST',
       headers: {

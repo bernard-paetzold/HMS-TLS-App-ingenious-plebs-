@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
-    "jsx": "react-jsx", // Use this setting for React 17+
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
         "./*"

@@ -5,6 +5,7 @@ declare global {
         interface RootParamList {
             HomeScreen: undefined;
             LoginScreen: undefined;
+            DemoScreen: undefined;
         }
     }
 }
