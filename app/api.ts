@@ -21,10 +21,10 @@ export const checkToken = async () => {
   return false;
 };
 
-export const login = async (username: string, password: string, ip: string = "") => {
+export const login = async (username: string, password: string, ip: string = "", port: string) => {
   try {
     if (API_URL == "" && ip != ""){
-      API_URL = `http://${ip}:8000`
+      API_URL = `http://${ip}:${port}`
     }
     const response = await fetch(`${API_URL}/auth/login/`, {
       method: 'POST',

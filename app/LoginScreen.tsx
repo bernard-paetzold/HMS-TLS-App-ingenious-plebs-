@@ -17,8 +17,9 @@ const LoginScreen = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [db_con_ip, setIP] = useState('');
-    
-    
+    const [port, setPort] = useState('');
+
+
     const showIPField = true
 
 
@@ -31,11 +32,11 @@ const LoginScreen = () => {
     const handleLogin = async () => {
         try {
             // Test connection by checking the token
-            const isTokenValid = await login(username, password, db_con_ip);
+            const isTokenValid = await login(username, password, db_con_ip, port);
             console.log(isTokenValid);
             if (isTokenValid) {
                 console.log("asd")
-                Alert.alert('Connection Successful', `Connected to ${db_con_ip}`);
+                Alert.alert('Connection Successful', `Connected to ${db_con_ip} with port ${port}`);
                 navigation.navigate('HomeScreen'); 
             } else {
                 console.log("dsa")
@@ -57,6 +58,15 @@ const LoginScreen = () => {
                     value={db_con_ip}
                     onChangeText={setIP}
                 />
+                
+            )}
+            {showIPField && ( // Conditionally render the IP input
+                <TextInput
+                style={styles.input}
+                placeholder="Hosted port"
+                value={port}
+                onChangeText={setPort}
+            />               
             )}
             <TextInput
                 style={styles.input}
