@@ -23,7 +23,7 @@ const LoginScreen = () => {
     const handleLogin = () => {
         
         if (username && password) {
-            Alert.alert('Login', `Username: ${username}\nPassword: ${password}`);
+            Alert.alert('Login successful', `Welcome ${username}!`);
             navigation.navigate('HomeScreen'); 
         } else {
             Alert.alert('Error', 'Please enter username and password');
