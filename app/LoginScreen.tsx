@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { Stack, useNavigation } from 'expo-router';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { login } from './api'
-
-type RootStackParamList = {
-    HomeScreen: undefined;
-    LoginScreen: undefined;
-};
-
-
-  
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LoginScreen'>;
+import { useNavigation, useRouter } from 'expo-router';
+import { login } from './api';
 
 const LoginScreen = () => {
     const [username, setUsername] = useState('');
@@ -19,49 +9,52 @@ const LoginScreen = () => {
     const [db_con_ip, setIP] = useState('');
     const [port, setPort] = useState('');
 
-
-    const showIPField = true
-
+    const showIPField = true;
 
     const navigation = useNavigation();
+    const router = useRouter();
 
     useEffect(() => {
-    navigation.setOptions({ headerShown: false });
+        navigation.setOptions({ headerShown: false });
     }, [navigation]);
 
     const handleLogin = async () => {
         try {
             const response = await login(username, password, db_con_ip, port);
             if (response.success) {
-                console.log("asd")
                 Alert.alert('Connection Successful', `Connected to ${db_con_ip} with port ${port}`);
-                navigation.navigate('HomeScreen'); 
+                const profileData = { first_name: "Test", last_name: "Name"};
+                router.push({
+                    pathname: '/HomeScreen',
+                    params: profileData,
+                })
+                // Pass the profile data as parameters to HomeScreen
+                //navigation.navigate('HomeScreen', profileData);
             }
         } catch (error) {
             Alert.alert('Error', 'Failed to connect to the server. Please check your IP address and login credentials.');
             console.error('Connection error', error);
         }
     };
-    
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Login Screen</Text>
-            {showIPField && ( // Conditionally render the IP input
+            {showIPField && (
                 <TextInput
                     style={styles.input}
                     placeholder="Hosted IP"
                     value={db_con_ip}
                     onChangeText={setIP}
                 />
-                
             )}
-            {showIPField && ( // Conditionally render the IP input
+            {showIPField && (
                 <TextInput
-                style={styles.input}
-                placeholder="Hosted port"
-                value={port}
-                onChangeText={setPort}
-            />               
+                    style={styles.input}
+                    placeholder="Hosted port"
+                    value={port}
+                    onChangeText={setPort}
+                />
             )}
             <TextInput
                 style={styles.input}

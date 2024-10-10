@@ -46,9 +46,10 @@ export const login = async (username: string, password: string, ip: string = "",
     }
 
     const data = await response.json();
+
     if(data.token) {
       await AsyncStorage.setItem('token', data.token);
-      return { success: true, token: data.token };
+      return { success: true, token: data.token,  };
     } else {
       throw new Error('Token not found');
     }
