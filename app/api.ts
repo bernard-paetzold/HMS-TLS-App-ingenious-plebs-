@@ -1,6 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let API_URL = ""; // Replace with your computer's ipv4 address
+export const setAPIUrl = (ip: string, port: string) => {
+  API_URL = `http://${ip}:${port}`
+}
 
 export const checkToken = async () => {
   const token = await AsyncStorage.getItem('token');
@@ -24,7 +27,7 @@ export const checkToken = async () => {
 export const login = async (username: string, password: string, ip: string = "", port: string) => {
   try {
     if (API_URL == "" && ip != ""){
-      API_URL = `http://${ip}:${port}`
+      setAPIUrl(ip, port);
     }
     const response = await fetch(`${API_URL}/auth/login/`, {
       method: 'POST',
@@ -37,7 +40,18 @@ export const login = async (username: string, password: string, ip: string = "",
       }),
     });
 
-    return response.json();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data = await response.json();
+    if(data.token) {
+      await AsyncStorage.setItem('token', data.token);
+      return { success: true, token: data.token };
+    } else {
+      throw new Error('Token not found');
+    }
   } catch (error) {
     console.error('Login error', error);
     throw error;

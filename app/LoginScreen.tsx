@@ -31,19 +31,14 @@ const LoginScreen = () => {
 
     const handleLogin = async () => {
         try {
-            // Test connection by checking the token
-            const isTokenValid = await login(username, password, db_con_ip, port);
-            console.log(isTokenValid);
-            if (isTokenValid) {
+            const response = await login(username, password, db_con_ip, port);
+            if (response.success) {
                 console.log("asd")
                 Alert.alert('Connection Successful', `Connected to ${db_con_ip} with port ${port}`);
                 navigation.navigate('HomeScreen'); 
-            } else {
-                console.log("dsa")
-                Alert.alert('Error', 'Could not connect. Please check your IP and try again.');
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to connect to the server. Please check your IP address.');
+            Alert.alert('Error', 'Failed to connect to the server. Please check your IP address and login credentials.');
             console.error('Connection error', error);
         }
     };
