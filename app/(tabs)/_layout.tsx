@@ -29,6 +29,15 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="assignment_detail"
+                options={{
+                    headerLeft: () => <></>,
+                    headerShown: false,
+                    title: "Assignment Detail",
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
                 name="recordvideo"
                 options={{
                     headerLeft: () => <></>,

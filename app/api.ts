@@ -168,6 +168,73 @@ export const update_user = async (userData: {
   return { success: false};
 };
 
+export const list_assignments= async (): Promise<{ success: boolean; assignment: Assignment | null}> => {
+  const token = await AsyncStorage.getItem('token');
+
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/assignment/list_allowed_student`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Something went wrong');
+      }
+  
+      const data = await response.json();
+      if(data.length != 0) {
+        console.log({ success: true, assignment: data[0]});
+        return { success: true, assignment: data[0]};
+      } else {
+        throw new Error('No assignments found');
+      }
+    } catch (error) {
+      console.error('No assignments found', error);
+      throw error;
+    }
+  }
+  return { success: false, assignment: null };
+}
+
+
+export const get_assignment = async (): Promise<{ success: boolean; assignment: Assignment | null}> => {
+  const token = await AsyncStorage.getItem('token');
+  var assignment_pk = await AsyncStorage.getItem('assignment_pk');
+  console.log('Fetching assignment from URL:', `${API_URL}/assignment/${assignment_pk}`);
+
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/assignment/${assignment_pk}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API error data:', errorData);
+        throw new Error(errorData.message || 'Assignment not found');
+      }
+  
+      const data = await response.json();
+      if(data.length != 0) {
+        console.log({ success: true, assignment: data});
+        return { success: true, assignment: data};
+      } else {
+        throw new Error('Assignment not found');
+      }
+    } catch (error) {
+      console.error('Assignment not found', error);
+      throw error;
+    }
+  }
+  return { success: false, assignment: null };
+}
+
 export type User = {
   username: string;
   first_name: string;
@@ -178,3 +245,14 @@ export type User = {
   is_active: boolean;
   role: string;
 };
+
+export type Assignment = {
+  id: number;
+  created_at: string;
+  lecturer: string;
+  subject: string;
+  name: string;
+  due_date: string;
+  marks: number;
+  assignment_info: string
+}

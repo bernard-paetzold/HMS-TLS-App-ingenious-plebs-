@@ -23,7 +23,7 @@ export default function Login(){
                 //const user = await (await get_user()).user as User;
 
                 router.push({
-                    pathname: "/home"
+                    pathname: "./home"
                 });
             }
         } catch (error) {
