@@ -51,6 +51,7 @@ export const login = async (username: string, password: string, ip: string = "",
     if(data.token) {
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('userId', username.indexOf.toString());
       return { success: true, token: data.token,  };
     } else {
       throw new Error('Token not found');
@@ -235,6 +236,117 @@ export const get_assignment = async (): Promise<{ success: boolean; assignment: 
   return { success: false, assignment: null };
 }
 
+export const list_user_submissions = async (userId: string): Promise<{ success: boolean; submissions: Submission[] | null }> => {
+  const token = await AsyncStorage.getItem('token');
+
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/submission/list_user_submissions/${userId}/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch submissions');
+      }
+
+      const data = await response.json();
+      return { success: true, submissions: data };
+    } catch (error) {
+      console.error('Error fetching user submissions', error);
+      return { success: false, submissions: null };
+    }
+  }
+  return { success: false, submissions: null };
+};
+
+export const get_video = async (): Promise<{ success: boolean; video: Submission | null}> => {
+  const token = await AsyncStorage.getItem('token');
+  var submission_pk = await AsyncStorage.getItem('submission_pk');
+  console.log('Fetching video from URL:', `${API_URL}/submission/${submission_pk}`);
+
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/submission/${submission_pk}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('No submission found:', errorData);
+        return { success: false, video: null };
+      }
+  
+      const data = await response.json();
+      if(data.length != 0) {
+        console.log({ success: true, video: data});
+        return { success: true, video: data};
+      } else {
+        throw new Error('Submission not found');
+      }
+    } catch (error) {
+      console.error('Submission not found', error);
+      throw error;
+    }
+  }
+  return { success: false, video: null };
+}
+
+export const submit_video = async (videoFile: any): Promise<{ success: boolean; video: Submission | null}> => {
+  const token = await AsyncStorage.getItem('token');
+
+  if (token && videoFile) {
+    try {
+      const videoSubmission = await fetch(videoFile.uri);
+      const blob = await videoSubmission.blob();
+
+      const formData = new FormData();
+      formData.append('video', blob, videoFile.name || 'video.mp4');
+
+      const response = await fetch(`${API_URL}/submission/create`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+        
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API error data:', errorData);
+        throw new Error(errorData.message || 'Something went wrong. Please try again');
+      }
+  
+      const data = await response.json();
+      if(data) {
+        const submission: Submission = {
+          id: data.id,
+          datetime: data.datetime,
+          file: data.file,
+          comment: data.comment,
+          user: data.user,
+          assignment: data.assignment,
+        };
+        console.log({ success: true, video: submission});
+        return { success: true, video: data};
+      } else {
+        throw new Error('An Error occurred');
+      }
+    } catch (error) {
+      console.error('An Error occurred', error);
+      throw error;
+    }
+  }
+  return { success: false, video: null };
+}
+
 export type User = {
   username: string;
   first_name: string;
@@ -255,4 +367,13 @@ export type Assignment = {
   due_date: string;
   marks: number;
   assignment_info: string
+}
+
+export type Submission = {
+  id: number;
+  datetime: string;
+  file: string;
+  comment: string;
+  user: string;
+  assignment: number;
 }
