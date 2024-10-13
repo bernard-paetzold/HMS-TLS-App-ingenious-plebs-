@@ -124,9 +124,7 @@ export const update_user = async (userData: {
   if (token) {
     try {
 
-      const currentUserData = (await get_user()).user
-
-      console.log(currentUserData);
+      //const currentUserData = (await get_user()).user
 
       const updatingInfo = {
         "username": username,
@@ -135,10 +133,9 @@ export const update_user = async (userData: {
         "email": userData.email,
         "password": userData.password,
         "is_active": true,
-        "role": currentUserData?.role
       }
 
-      console.log(updatingInfo);
+      console.log(JSON.stringify(updatingInfo));
 
       const response = await fetch(`${API_URL}/users/edit/`, {
         method: 'PATCH',
@@ -154,6 +151,7 @@ export const update_user = async (userData: {
       }
   
       const data = await response.json();
+      console.log(data);
       if(data.length != 0) {
         console.log({ success: true});
         return { success: true};

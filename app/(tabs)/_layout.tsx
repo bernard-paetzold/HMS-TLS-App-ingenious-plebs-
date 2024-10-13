@@ -5,14 +5,6 @@ export default function TabLayout() {
     return (
         <Tabs>
             <Tabs.Screen
-                name="index"
-                options={{
-                    headerLeft: () => <></>,
-                    headerShown: false,
-                    title: "Logout",
-                }}
-            />
-            <Tabs.Screen
                 name="home"
                 options={{
                     headerLeft: () => <></>,

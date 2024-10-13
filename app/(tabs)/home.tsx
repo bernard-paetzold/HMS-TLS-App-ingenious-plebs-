@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Pressable, ActivityIndicator } from "react-native";
-import { User, get_user } from "../api"; 
+import { Text, View, StyleSheet, Pressable, ActivityIndicator, TouchableOpacity } from "react-native";
+import { User, get_user, logout } from "../api"; 
+import { useRouter } from 'expo-router';
 
 export default function Homescreen() {
 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>();
+
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -48,6 +51,13 @@ export default function Homescreen() {
         );
     }
 
+    const onLogout = async () => {
+        await logout()
+        router.push({
+            pathname: "/login"
+        });
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.content}>
@@ -56,6 +66,9 @@ export default function Homescreen() {
                 </Text>
                 <Text style={styles.profileText}>Full Stack Developer</Text>
             </View>
+            <TouchableOpacity style={styles.button} onPress={onLogout}>
+                <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -116,5 +129,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         textAlign: 'center',
+    },
+    button: {
+        backgroundColor: '#FF4C4C', // Red background color
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+        buttonText: {
+        color: '#FFFFFF', // White text color
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
