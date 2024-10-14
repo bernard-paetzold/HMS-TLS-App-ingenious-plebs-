@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TurboModuleRegistry } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
-let API_URL = ""; // Replace with your computer's ipv4 address
+let API_URL = "";
 export const setAPIUrl = (ip: string, port: string) => {
   API_URL = `http://${ip}:${port}`
 }
@@ -49,9 +50,22 @@ export const login = async (username: string, password: string, ip: string = "",
     const data = await response.json();
 
     if(data.token) {
+      const response = await fetch(`${API_URL}/users/like/${username}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${data.token}`,
+        },});
+      const responseData = await response.json();
+      if (Array.isArray(responseData) && responseData.length > 0) {
+        const userId = responseData[0].id;
+        await AsyncStorage.setItem('userId', userId.toString());
+      } else {
+        console.error('Error: userId is undefined in the response', responseData);
+      }
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('username', username);
-      await AsyncStorage.setItem('userId', username.indexOf.toString());
+      
+      console.log({ success: true, token: data[0]});
       return { success: true, token: data.token,  };
     } else {
       throw new Error('Token not found');
@@ -265,87 +279,98 @@ export const list_user_submissions = async (userId: string): Promise<{ success: 
 
 export const get_video = async (): Promise<{ success: boolean; video: Submission | null}> => {
   const token = await AsyncStorage.getItem('token');
-  var submission_pk = await AsyncStorage.getItem('submission_pk');
-  console.log('Fetching video from URL:', `${API_URL}/submission/${submission_pk}`);
+  var user_pk = await AsyncStorage.getItem('userId');
+  var assignment_pk = await AsyncStorage.getItem('assignment_pk')
+  console.log('Fetching video from URL:', `${API_URL}/submission/${user_pk}/${assignment_pk}`);
 
   if (token) {
     try {
-      const response = await fetch(`${API_URL}/submission/${submission_pk}`, {
+      const response = await fetch(`${API_URL}/submission/${user_pk}/${assignment_pk}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${token}`,
         },
         
       });
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log('No submission found:', errorData);
+        console.log('No submission found:', data);
         return { success: false, video: null };
       }
   
-      const data = await response.json();
       if(data.length != 0) {
         console.log({ success: true, video: data});
         return { success: true, video: data};
       } else {
-        throw new Error('Submission not found');
+        console.log('Submission not found', data);
       }
     } catch (error) {
-      console.error('Submission not found', error);
-      throw error;
+      console.log('Submission not found', error);
     }
   }
   return { success: false, video: null };
 }
 
-export const submit_video = async (videoFile: any): Promise<{ success: boolean; video: Submission | null}> => {
+export const submit_video = async (videoFile: ImagePicker.ImagePickerAsset): Promise<{ success: boolean; video?: Submission; error?: string }> => {
   const token = await AsyncStorage.getItem('token');
-
-  if (token && videoFile) {
-    try {
-      const videoSubmission = await fetch(videoFile.uri);
-      const blob = await videoSubmission.blob();
-
-      const formData = new FormData();
-      formData.append('video', blob, videoFile.name || 'video.mp4');
-
-      const response = await fetch(`${API_URL}/submission/create`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-        body: formData,
-        
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API error data:', errorData);
-        throw new Error(errorData.message || 'Something went wrong. Please try again');
-      }
-  
-      const data = await response.json();
-      if(data) {
-        const submission: Submission = {
-          id: data.id,
-          datetime: data.datetime,
-          file: data.file,
-          comment: data.comment,
-          user: data.user,
-          assignment: data.assignment,
-        };
-        console.log({ success: true, video: submission});
-        return { success: true, video: data};
-      } else {
-        throw new Error('An Error occurred');
-      }
-    } catch (error) {
-      console.error('An Error occurred', error);
-      throw error;
-    }
+  console.log('File received:', videoFile)
+  if (!token) {
+    return { success: false, error: 'User is not authenticated.' };
   }
-  return { success: false, video: null };
-}
+
+  if (!videoFile || !videoFile.uri) {
+    return { success: false, error: 'No video file provided.' };
+  }
+
+  try {
+    const assignment_fk = await AsyncStorage.getItem('assignment_pk');
+
+    if (!assignment_fk) {
+      throw new Error('Assignment ID is missing.');
+    }
+    const formData = new FormData();
+    formData.append('file', {
+      uri: videoFile.uri,
+      name: videoFile.fileName || 'video.mp4',
+      type: videoFile.type || 'video/mp4',
+    } as any); 
+    formData.append('assignment', assignment_fk);
+    console.log('API URL:', `${API_URL}/submission/create/`);
+    const apiResponse = await fetch(`${API_URL}/submission/create/`, { //problem function (not reaching backend at all)
+      method: 'POST',
+      headers: {
+          'Authorization': `Token ${token}`,
+        },
+      body: formData,
+    });
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error('API Response Text:', errorText); 
+      throw new Error('Failed to submit video.');
+    }
+
+    const data = await apiResponse.json();
+    
+    if (data) {
+      const submission: Submission = {
+        id: data.id,
+        datetime: data.datetime,
+        file: data.file,
+        comment: data.comment,
+        user: data.user,
+        assignment: data.assignment,
+        };
+        return { success: true, video: submission };
+    } else {
+        throw new Error('Invalid response data.');
+    }
+  } catch (error: any) {
+      console.error('Submit video error:', error.message);
+      return { success: false, error: error.message };
+  }
+};
 
 export type User = {
   username: string;

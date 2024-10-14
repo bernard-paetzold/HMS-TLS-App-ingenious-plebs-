@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, View, Text, StyleSheet, ActivityIndicator, Image, Button, Alert } from 'react-native';
-import { get_assignment, Assignment, submit_video, Submission, get_video, list_user_submissions } from '../api';
+import { get_assignment, Assignment, submit_video, Submission, get_video, } from '../api';
 import { format } from 'date-fns';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -12,7 +12,7 @@ export default function AssignmentDetail() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const [userId, setUserId] = useState<string | null>(null);
-    const [video, setVideo] = useState<Submission | null>(null);
+    const [video, setVideo] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [submissionMessage, setSubmissionMessage] = useState<string>('No submission yet');
     
     useEffect(() => {
@@ -48,11 +48,11 @@ export default function AssignmentDetail() {
         const fetchUserSubmissions = async () => {
             if (userId && assignment) {
                 try {
-                    const response = await list_user_submissions(userId);
+                    const response = await get_video();
                     console.log("API Response:", response); 
     
-                    if (response.success && Array.isArray(response.submissions)) {
-                        const assignmentSubmission = response.submissions.find(
+                    if (response.success && Array.isArray(response.video)) {
+                        const assignmentSubmission = response.video.find(
                             (submission) => submission.assignment === assignment.id
                         );
                         setSubmissionMessage(assignmentSubmission ? assignmentSubmission.file : 'No submission yet');
@@ -63,8 +63,8 @@ export default function AssignmentDetail() {
                     if (!assignment || !userId) {
                         console.log("No submissions expected yet.");
                     } else {
-                        console.error("Error fetching user submissions:", error);
-                        setSubmissionMessage('Error fetching submissions.');
+                        console.log("No submission present", error);
+                        setSubmissionMessage('No submission found');
                     }
                 }
             }
@@ -95,7 +95,7 @@ export default function AssignmentDetail() {
                 assignment: Number(assignment?.id), 
             };
     
-            setVideo(submission);
+            setVideo(selectedVideo);
         }
     };
 
@@ -108,9 +108,9 @@ export default function AssignmentDetail() {
             setLoading(true);
             const response = await submit_video(video);
             if (response.success) {
-                console.error("Submission successful")
+                console.log("Submission successful")
             } else {
-                Alert.alert('Error', 'Video submission failed');
+                Alert.alert('Error', video.uri || 'Video submission failed');
             }
 
         }
@@ -120,6 +120,7 @@ export default function AssignmentDetail() {
                 errorMessage = error.message; 
             }
             Alert.alert('Error', errorMessage || 'Something went wrong.')
+            console.error("Error", errorMessage)
         } finally {
             setLoading(false);
         }
@@ -162,7 +163,7 @@ export default function AssignmentDetail() {
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text>{submissionMessage}</Text>
                 <Button title="Pick a Video" onPress={pickVideo} />
-                {video && <Text>Selected video: {video.file.split('/').pop()}</Text>}
+                {video && <Text>Selected video: {video.uri.split('/').pop()}</Text>}
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
