@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TurboModuleRegistry } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 let API_URL = "";
 export const setAPIUrl = (ip: string, port: string) => {
@@ -28,7 +29,7 @@ export const checkToken = async () => {
 
 export const login = async (username: string, password: string, ip: string = "", port: string) => {
   try {
-    if (API_URL == "" && ip != ""){
+    if (ip != ""){
       setAPIUrl(ip, port);
     }
     const response = await fetch(`${API_URL}/auth/login/`, {
@@ -313,14 +314,14 @@ export const get_video = async (): Promise<{ success: boolean; video: Submission
   return { success: false, video: null };
 }
 
-export const submit_video = async (videoFile: ImagePicker.ImagePickerAsset): Promise<{ success: boolean; video?: Submission; error?: string }> => {
+export const submit_video = async (videoFile: File): Promise<{ success: boolean; video?: Submission; error?: string }> => {
   const token = await AsyncStorage.getItem('token');
   console.log('File received:', videoFile)
   if (!token) {
     return { success: false, error: 'User is not authenticated.' };
   }
 
-  if (!videoFile || !videoFile.uri) {
+  if (!videoFile) {
     return { success: false, error: 'No video file provided.' };
   }
 
@@ -330,28 +331,35 @@ export const submit_video = async (videoFile: ImagePicker.ImagePickerAsset): Pro
     if (!assignment_fk) {
       throw new Error('Assignment ID is missing.');
     }
+    // const createBlob = async (uri: string): Promise<Blob> => {
+    //   const response = await fetch(uri);
+    //   const blob = await response.blob();
+    //   return blob;
+    // };
+    // const blob = await createBlob(videoFile);
     const formData = new FormData();
-    formData.append('file', {
-      uri: videoFile.uri,
-      name: videoFile.fileName || 'video.mp4',
-      type: videoFile.type || 'video/mp4',
-    } as any); 
+    formData.append('file', videoFile, 'sample.mp4'); 
+    formData.append('comment', '');
     formData.append('assignment', assignment_fk);
-    console.log('API URL:', `${API_URL}/submission/create/`);
-    const apiResponse = await fetch(`${API_URL}/submission/create/`, { //problem function (not reaching backend at all)
-      method: 'POST',
-      headers: {
+    
+    console.log('Form data:', formData);
+    console.log('Video:', videoFile);
+    const response = await axios.post(`${API_URL}/submission/create/`, 
+      formData, {
+        headers: {
           'Authorization': `Token ${token}`,
         },
-      body: formData,
-    });
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error('API Response Text:', errorText); 
-      throw new Error('Failed to submit video.');
-    }
+      }
+    );
+    console.log('Form data:', formData);
+    console.log('Video:', videoFile);
+    // if (!response.ok) {
+    //   const errorText = await response.text();
+    //   console.error('API Response Text:', errorText); 
+    //   throw new Error('Failed to submit video.');
+    // }
 
-    const data = await apiResponse.json();
+    const data = await response.data;
     
     if (data) {
       const submission: Submission = {
