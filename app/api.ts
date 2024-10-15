@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TurboModuleRegistry } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
 
 let API_URL = "";
 export const setAPIUrl = (ip: string, port: string) => {
@@ -286,7 +287,7 @@ export const get_video = async (): Promise<{ success: boolean; video: Submission
 
   if (token) {
     try {
-      const response = await fetch(`${API_URL}/submission/${user_pk}/${assignment_pk}`, {
+      const response = await fetch(`${API_URL}/submission/submission/${user_pk}/${assignment_pk}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${token}`,
@@ -303,7 +304,15 @@ export const get_video = async (): Promise<{ success: boolean; video: Submission
   
       if(data.length != 0) {
         console.log({ success: true, video: data});
-        return { success: true, video: data};
+        const submission: Submission = {
+          id: data.id,
+          datetime: data.datetime,
+          file: data.file,
+          comment: data.comment,
+          user: data.user,
+          assignment: data.assignment,
+          };
+        return { success: true, video: submission};
       } else {
         console.log('Submission not found', data);
       }
@@ -314,7 +323,7 @@ export const get_video = async (): Promise<{ success: boolean; video: Submission
   return { success: false, video: null };
 }
 
-export const submit_video = async (videoFile: File): Promise<{ success: boolean; video?: Submission; error?: string }> => {
+export const submit_video = async (videoFile: string, comment: string): Promise<{ success: boolean; video?: string; error?: string }> => {
   const token = await AsyncStorage.getItem('token');
   console.log('File received:', videoFile)
   if (!token) {
@@ -331,46 +340,87 @@ export const submit_video = async (videoFile: File): Promise<{ success: boolean;
     if (!assignment_fk) {
       throw new Error('Assignment ID is missing.');
     }
-    // const createBlob = async (uri: string): Promise<Blob> => {
-    //   const response = await fetch(uri);
-    //   const blob = await response.blob();
-    //   return blob;
-    // };
-    // const blob = await createBlob(videoFile);
-    const formData = new FormData();
-    formData.append('file', videoFile, 'sample.mp4'); 
-    formData.append('comment', '');
-    formData.append('assignment', assignment_fk);
     
-    console.log('Form data:', formData);
     console.log('Video:', videoFile);
-    const response = await axios.post(`${API_URL}/submission/create/`, 
-      formData, {
+    const response = await FileSystem.uploadAsync(`${API_URL}/submission/create/`, 
+      videoFile, {
+        fieldName: 'file',
+        httpMethod: 'POST',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         headers: {
           'Authorization': `Token ${token}`,
         },
+        parameters: {
+          assignment: assignment_fk,
+          comment: comment
+        }
       }
     );
-    console.log('Form data:', formData);
     console.log('Video:', videoFile);
-    // if (!response.ok) {
-    //   const errorText = await response.text();
-    //   console.error('API Response Text:', errorText); 
-    //   throw new Error('Failed to submit video.');
-    // }
+    if (!response.status) {
+      const errorText = await response.status;
+      console.error('API Response Text:', errorText); 
+      throw new Error('Failed to submit video.');
+    }
 
-    const data = await response.data;
+    const data = await response.body;
     
     if (data) {
-      const submission: Submission = {
-        id: data.id,
-        datetime: data.datetime,
-        file: data.file,
-        comment: data.comment,
-        user: data.user,
-        assignment: data.assignment,
-        };
-        return { success: true, video: submission };
+        return { success: true, video: videoFile };
+    } else {
+        throw new Error('Invalid response data.');
+    }
+  } catch (error: any) {
+      console.error('Submit video error:', error.message);
+      return { success: false, error: error.message };
+  }
+};
+
+export const update_video = async (videoFile: string, comment: string): Promise<{ success: boolean; video?: string; error?: string }> => {
+  const token = await AsyncStorage.getItem('token');
+  console.log('File received:', videoFile)
+  if (!token) {
+    return { success: false, error: 'User is not authenticated.' };
+  }
+
+  if (!videoFile) {
+    return { success: false, error: 'No video file provided.' };
+  }
+
+  try {
+    const assignment_fk = await AsyncStorage.getItem('assignment_pk');
+    const submission_pk = await AsyncStorage.getItem('submission_pk');
+
+    if (!assignment_fk) {
+      throw new Error('Assignment ID is missing.');
+    }
+    
+    console.log('Video:', videoFile);
+    const response = await FileSystem.uploadAsync(`${API_URL}/submission/edit/${submission_pk}`, 
+      videoFile, {
+        fieldName: 'file',
+        httpMethod: 'PATCH',
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        parameters: {
+          assignment: assignment_fk,
+          comment: comment
+        }
+      }
+    );
+    console.log('Video:', videoFile);
+    if (!response.status) {
+      const errorText = await response.status;
+      console.error('API Response Text:', errorText); 
+      throw new Error('Failed to submit video.');
+    }
+
+    const data = await response.body;
+    
+    if (data) {
+        return { success: true, video: videoFile };
     } else {
         throw new Error('Invalid response data.');
     }

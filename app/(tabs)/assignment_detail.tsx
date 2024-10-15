@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { SafeAreaView, View, Text, StyleSheet, ActivityIndicator, Image, Button, Alert } from 'react-native';
-import { get_assignment, Assignment, submit_video, Submission, get_video, } from '../api';
+import { SafeAreaView, View, Text, StyleSheet, ActivityIndicator, Image, Button, Alert, TextInput } from 'react-native';
+import { get_assignment, Assignment, submit_video, Submission, get_video, update_video } from '../api';
 import { format } from 'date-fns';
 import * as ImagePicker from 'expo-image-picker';
+//import { Video } from 'react-native-compressor';
 
 export default function AssignmentDetail() {
     const [assignment, setAssignment] = useState<Assignment | null>(null);
@@ -14,6 +15,7 @@ export default function AssignmentDetail() {
     const [userId, setUserId] = useState<string | null>(null);
     const [video, setVideo] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [submissionMessage, setSubmissionMessage] = useState<string>('No submission yet');
+    const [comment, setComment] = useState<string>('')
     
     useEffect(() => {
         const fetchAssignment = async () => {
@@ -56,15 +58,19 @@ export default function AssignmentDetail() {
                             (submission) => submission.assignment === assignment.id
                         );
                         setSubmissionMessage(assignmentSubmission ? assignmentSubmission.file : 'No submission yet');
+                        AsyncStorage.setItem('submission_pk', assignmentSubmission.id);
                     } else {
                         setSubmissionMessage('No submissions found.');
+                        AsyncStorage.setItem('submission_pk', 'null');
                     }
                 } catch (error) {
                     if (!assignment || !userId) {
                         console.log("No submissions expected yet.");
+                        AsyncStorage.setItem('submission_pk', 'null');
                     } else {
                         console.log("No submission present", error);
                         setSubmissionMessage('No submission found');
+                        AsyncStorage.setItem('submission_pk', 'null');
                     }
                 }
             }
@@ -72,6 +78,8 @@ export default function AssignmentDetail() {
     
         fetchUserSubmissions();
       }, [userId, assignment]);
+
+      
 
     const pickVideo = async () => {
         const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -86,14 +94,18 @@ export default function AssignmentDetail() {
 
         if(!result.canceled && result.assets && result.assets.length > 0) {
             const selectedVideo = result.assets[0];
-            const submission: Submission = {
-                id: 0, 
-                datetime: new Date().toISOString(), 
-                file: selectedVideo.uri, 
-                comment: '', 
-                user: userId || '', 
-                assignment: Number(assignment?.id), 
-            };
+            // const compressedVideo = await Video.compress(
+            //     selectedVideo.uri,
+            //     {},
+            //     (progress) => {
+            //       console.log('Compression Progress: ', progress);
+            //     }
+            //   );
+            // if (compressedVideo) {
+            //     AsyncStorage.setItem('compressVid_uri', compressedVideo);
+            // } else {
+            //     AsyncStorage.setItem('compressVid_uri', ''); 
+            // }
     
             setVideo(selectedVideo);
         }
@@ -106,12 +118,30 @@ export default function AssignmentDetail() {
         }
         try {
             setLoading(true);
-            const response = await submit_video(video);
-            if (response.success) {
-                console.log("Submission successful")
-            } else {
-                Alert.alert('Error', video.uri || 'Video submission failed');
+            const log = async(response: any) => {
+                if (response && response.success) {
+                    console.log("Submission successful")
+                } else {
+                    Alert.alert('Error', video.uri || 'Video submission failed');
+                }
             }
+            const videoFile = await AsyncStorage.getItem('compressVid_uri');
+            const subId = await AsyncStorage.getItem('submission_pk').toString();
+            if(video) {
+                if(subId == 'null'){
+                    const response = await submit_video(video.uri, comment);
+                    log(response);
+                    Alert.alert('Success', video.uri || 'Video successfully uploaded');
+                } else {
+                    const response = await update_video(video.uri, comment);
+                    log(response);
+                    Alert.alert('Success', video.uri || 'Submission successfully updated');
+                }
+            } else {
+                Alert.alert('No compressed video found');
+                console.error('No compressed video found');
+            }
+            
 
         }
         catch (error) {
@@ -123,6 +153,33 @@ export default function AssignmentDetail() {
             console.error("Error", errorMessage)
         } finally {
             setLoading(false);
+            if (userId && assignment) {
+                try {
+                    const response = await get_video();
+                    console.log("API Response:", response); 
+    
+                    if (response.success && Array.isArray(response.video)) {
+                        const assignmentSubmission = response.video.find(
+                            (submission) => submission.assignment === assignment.id
+                        );
+                        setSubmissionMessage(assignmentSubmission ? assignmentSubmission.file : 'No submission yet');
+                        AsyncStorage.setItem('submission_pk', assignmentSubmission.id);
+                    } else {
+                        setSubmissionMessage('No submissions found.');
+                        AsyncStorage.setItem('submission_pk', 'null');
+                    }
+                } catch (error) {
+                    if (!assignment || !userId) {
+                        console.log("No submissions expected yet.");
+                        AsyncStorage.setItem('submission_pk', 'null');
+                    } else {
+                        console.log("No submission present", error);
+                        setSubmissionMessage('No submission found');
+                        AsyncStorage.setItem('submission_pk', 'null');
+                    }
+                }
+            
+        };
         }
     };
 
@@ -170,6 +227,13 @@ export default function AssignmentDetail() {
                     <Button title="Submit Video" onPress={handleSubmit} />
                 )}
             </View>
+
+            <TextInput
+                style={styles.comment}
+                placeholder="Enter your comment"
+                value={comment}
+                onChangeText={setComment}  
+            />
         </SafeAreaView>
     );
 }
@@ -220,5 +284,13 @@ const styles = StyleSheet.create({
     videoPickerContainer: {
         marginTop: 20,
         alignItems: 'center', 
+    },
+    comment: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        // marginBottom: 10,
+        // paddingHorizontal: 10,
+        fontSize: 16,
     },
 });

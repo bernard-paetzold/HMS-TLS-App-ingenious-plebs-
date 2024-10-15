@@ -2,6 +2,7 @@ import { Text, View, StyleSheet, Alert, TextInput, Button } from "react-native";
 import { useState, useEffect } from 'react';
 import { login, get_user, User } from './api';
 import { useRouter } from 'expo-router';
+import RNFS from 'react-native-fs';
 
 export default function Login(){
 
@@ -21,7 +22,6 @@ export default function Login(){
                 Alert.alert('Connection Successful', `Connected to ${db_con_ip} with port ${port}`);
 
                 //const user = await (await get_user()).user as User;
-
                 router.push({
                     pathname: "./home"
                 });
