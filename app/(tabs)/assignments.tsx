@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, StyleSheet, SafeAreaView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { list_assignments,  Assignment } from '../api';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 
 export default function AssignmentsScreen(){

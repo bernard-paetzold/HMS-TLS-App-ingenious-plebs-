@@ -97,7 +97,7 @@ export const logout = async () => {
   }
 };
 
-export const get_user = async (): Promise<{ success: boolean; user: User | null}> => {
+export const get_user = async (): Promise <{ success: boolean; user: User | null}> => {
   const token = await AsyncStorage.getItem('token');
   var username = await AsyncStorage.getItem('username');
 
