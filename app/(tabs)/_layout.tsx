@@ -46,17 +46,6 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="recordvideo"
-                options={{
-                    headerLeft: () => <></>,
-                    headerShown: false,
-                    title: "Videos",
-                    tabBarIcon: ({ color, size }) => (
-                        <Ionicons name="videocam-outline" color={color} size={size} />
-                    ),
-                }}
-            />
-            <Tabs.Screen
                 name="profile"
                 options={{
                     headerLeft: () => <></>,

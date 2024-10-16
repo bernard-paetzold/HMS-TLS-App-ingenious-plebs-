@@ -35,6 +35,20 @@ export default function Login(){
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Login Screen</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+            />
+            <Text style={styles.title}>For DEMO purposes only</Text>
             {showIPField && (
                 <TextInput
                     style={styles.input}
@@ -51,19 +65,6 @@ export default function Login(){
                     onChangeText={setPort}
                 />
             )}
-            <TextInput
-                style={styles.input}
-                placeholder="Username"
-                value={username}
-                onChangeText={setUsername}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-            />
             <Button title="Login" onPress={handleLogin} />
         </View>
     )
@@ -74,14 +75,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 16,
-        backgroundColor: 'purple',
+        backgroundColor: '#f0f0f5',
     },
     title: {
         fontSize: 24,
         marginBottom: 24,
         textAlign: 'center',
         fontWeight: 'bold',
-        color: 'white',
+        color: 'black',
     },
     input: {
         height: 40,

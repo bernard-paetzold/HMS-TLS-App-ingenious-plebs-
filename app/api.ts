@@ -250,6 +250,48 @@ export const get_assignment = async (): Promise<{ success: boolean; assignment: 
   return { success: false, assignment: null };
 }
 
+export const get_feedback = async (): Promise<{ success: boolean; feedback: Feedback | null}> => {
+  const token = await AsyncStorage.getItem('token');
+  var submission_pk = await AsyncStorage.getItem('submission_pk')
+
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/feedback/submission_feedback/${submission_pk}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.log('No feedback found:', data);
+        return { success: false, feedback: null };
+      }
+  
+      if(data.length != 0) {
+        console.log({ success: true, feedback: data});
+        const feedback: Feedback = {
+          submission: data.submission,
+          id: data.id,
+          created_at: data.created_at,
+          lecturer: data.lecturer,
+          mark: data.mark,
+          comment: data.comment
+          };
+        return { success: true, feedback: feedback};
+      } else {
+        console.log('Feedback not found', data);
+      }
+    } catch (error) {
+      console.log('Feedback not found', error);
+    }
+  }
+  return { success: false, feedback: null };
+}
+
 export const list_user_submissions = async (userId: string): Promise<{ success: boolean; submissions: Submission[] | null }> => {
   const token = await AsyncStorage.getItem('token');
 
@@ -457,4 +499,13 @@ export type Submission = {
   comment: string;
   user: string;
   assignment: number;
+}
+
+export type Feedback = {
+  submission: number
+  id:number
+  created_at: string
+  lecturer: number
+  mark: number
+  comment: string
 }

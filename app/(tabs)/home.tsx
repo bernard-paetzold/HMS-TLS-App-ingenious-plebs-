@@ -63,7 +63,7 @@ export default function Homescreen() {
                 <Text style={styles.welcomeText}>
                     Welcome, {user?.first_name} {user?.last_name}!
                 </Text>
-                <Text style={styles.profileText}>Full Stack Developer</Text>
+                <Text style={styles.profileText}>{user?.role}</Text>
             </View>
             <TouchableOpacity style={styles.button} onPress={onLogout}>
                 <Text style={styles.buttonText}>Logout</Text>
@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     button: {
-        backgroundColor: '#FF4C4C', // Red background color
+        backgroundColor: '#FF4C4C', 
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
     },
         buttonText: {
-        color: '#FFFFFF', // White text color
+        color: '#FFFFFF', 
         fontSize: 16,
         fontWeight: 'bold',
     },

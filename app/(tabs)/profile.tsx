@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Alert, TextInput, Button, ActivityIndicator, TouchableOpacity } from "react-native";
 import { get_user, User, update_user, logout } from "../api";
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotFound() {
     const [user, setUser] = useState<User | null>(null);
@@ -82,7 +83,7 @@ export default function NotFound() {
             Alert.alert("Profile updated successfully!");
         } catch (err) {
             console.error(err);
-            Alert.alert("Failed to update profile.");
+            Alert.alert("Failed to update profile.", "Please ensure your password is correct.");
         }
     };
   
@@ -138,6 +139,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         marginBottom: 24,
+        marginTop: 30,
         textAlign: "center",
         fontWeight: "bold",
         color: "black",
@@ -162,13 +164,14 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     button: {
-        backgroundColor: '#FF4C4C', // Red background color
+        backgroundColor: '#FF4C4C', 
         padding: 10,
         borderRadius: 5,
+        marginTop: 10,
         alignItems: 'center',
     },
         buttonText: {
-        color: '#FFFFFF', // White text color
+        color: '#FFFFFF', 
         fontSize: 16,
         fontWeight: 'bold',
     },
