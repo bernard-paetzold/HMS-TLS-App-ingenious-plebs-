@@ -10,7 +10,7 @@ In order to ensure you are able to accurately run this demo, make sure you set u
 There are two methods through which you can setup this application to test it.
 
 ### 1. Install APK
-Install the apk found at: https://expo.dev/artifacts/eas/nyfip5TaHm9EB8nCCw7ESS.apk
+Install the apk found at: https://expo.dev/artifacts/eas/nyfip5TaHm9EB8nCCw7ESS.apk \n
 This apk is build for android, should you wish to have an apk for IOS, follow the second setup method below and follow the instructions to build an apk at: https://docs.expo.dev/build/setup/
 
 ### 2. Setup Expo GO
