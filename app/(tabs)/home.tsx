@@ -13,9 +13,8 @@ export default function Homescreen() {
             setLoading(true);
             try {
                 const response = await get_user();
-                console.log("API Response:", response); // Log the entire response
+                console.log("API Response:", response); 
                 
-                // Check if response and user data are present
                 if (response && response.user) {
                     setUser(response.user);
                 } else {

@@ -9,10 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-#Temporarily ignored because they have yet to be completed and i don't want to break anything with it
-app/* 
-*ADetScreen
-*AListScreen
+
 
 # macOS
 .DS_Store

@@ -1,5 +1,6 @@
 import { Stack, Tabs } from "expo-router"
 import { Text, TouchableOpacity, View, Alert } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
     return (
@@ -10,6 +11,7 @@ export default function TabLayout() {
                     headerLeft: () => <></>,
                     headerShown: false,
                     title: "Logout",
+                    href: null,
                 }}
             />
             <Tabs.Screen
@@ -17,7 +19,10 @@ export default function TabLayout() {
                 options={{
                     headerLeft: () => <></>,
                     headerShown: false,
-                    title: "Home"
+                    title: "Home",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="home-outline" color={color} size={size} />
+                    )
                 }}
             />
             <Tabs.Screen
@@ -25,7 +30,19 @@ export default function TabLayout() {
                 options={{
                     headerLeft: () => <></>,
                     headerShown: false,
-                    title: "Assignments"
+                    title: "Assignments",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="document-text-outline" color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="assignment_detail"
+                options={{
+                    headerLeft: () => <></>,
+                    headerShown: false,
+                    title: "Assignment Detail",
+                    href: null,
                 }}
             />
             <Tabs.Screen
@@ -33,7 +50,10 @@ export default function TabLayout() {
                 options={{
                     headerLeft: () => <></>,
                     headerShown: false,
-                    title: "Videos"
+                    title: "Videos",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="videocam-outline" color={color} size={size} />
+                    ),
                 }}
             />
             <Tabs.Screen
@@ -41,7 +61,10 @@ export default function TabLayout() {
                 options={{
                     headerLeft: () => <></>,
                     headerShown: false,
-                    title: "Profile"
+                    title: "Profile",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="person-outline" color={color} size={size} />
+                    )
                 }}
             />
         </Tabs>
