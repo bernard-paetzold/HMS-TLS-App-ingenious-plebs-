@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Alert, TextInput, Button, ActivityIndicator } from "react-native";
-import { get_user, User, update_user } from "../api";
+import { Text, View, StyleSheet, Alert, TextInput, Button, ActivityIndicator, TouchableOpacity } from "react-native";
+import { get_user, User, update_user, logout } from "../api";
 import { useRouter } from 'expo-router';
 
 export default function NotFound() {
@@ -58,6 +58,13 @@ export default function NotFound() {
         );
     }
   
+    const onLogout = async () => {
+        await logout()
+        router.push({
+            pathname: "/login"
+        });
+    }
+
     const handleUpdateProfile = async () => {
         
         const updatedUser = {
@@ -116,6 +123,9 @@ export default function NotFound() {
                 secureTextEntry
             />
             <Button title="Update Profile" onPress={handleUpdateProfile} />
+            <TouchableOpacity style={styles.button} onPress={onLogout}>
+                <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -150,5 +160,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 18,
         marginTop: 10
+    },
+    button: {
+        backgroundColor: '#FF4C4C', // Red background color
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+        buttonText: {
+        color: '#FFFFFF', // White text color
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
