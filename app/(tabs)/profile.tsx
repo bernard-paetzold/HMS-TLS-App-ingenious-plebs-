@@ -77,7 +77,7 @@ export default function NotFound() {
         try {
             await update_user(updatedUser);
             router.push({
-                pathname: "/home"
+                pathname: "./home"
             });
             Alert.alert("Profile updated successfully!");
         } catch (err) {
@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
         color: 'red',
         textAlign: 'center',
         fontSize: 18,
+        marginTop: 10
     },
     button: {
         backgroundColor: '#FF4C4C', // Red background color
